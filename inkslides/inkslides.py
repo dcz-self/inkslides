@@ -421,3 +421,6 @@ def main():
         i.runwatch(file=args.file, temp=args.temp)
     else:
         i.run(file=args.file, temp=args.temp)
+        
+if __name__ == '__main__':
+    main()
