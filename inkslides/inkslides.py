@@ -168,8 +168,8 @@ class InkSlides(object):
 
         # find the content descriptor, i.e., which slides to include when + how
         # self.content = self.get_content_description()
-        self.content = self.get_layer_structure() if not self.flat else self.get_flat_layer_structure()
-
+        self.content = list(self.get_layer_structure()) if not self.flat else self.get_flat_layer_structure()
+        print(self.content)
         # set all elements in the pdf to hidden
         hide_all_layers(self.doc)
 
@@ -344,20 +344,15 @@ class InkSlides(object):
                         current_layers.append(l.text.strip())
 
     def get_layer_structure(self):
+        return enumerate(self.get_layers())
+
+    def get_layers(self):
         """
         Determine the layer structure
         """
-        slide_tree = []
-        num_slide = 0
-
         # iterate in reverse because svg is formated in this way
-        for sec in self.doc.getroot().xpath('./svg:g[@inkscape:groupmode="layer"]', namespaces=nsmap):
-
-            for slide in sec.xpath('./svg:g[@inkscape:groupmode="layer"]', namespaces=nsmap):
-
-                num_slide += 1
-
-                current_slide = [get_label(sec), get_label(slide)]
+        for slide in self.doc.getroot().xpath('./svg:g[@inkscape:groupmode="layer"]', namespaces=nsmap):
+                current_slide = [get_label(slide)]
                 self.add_master_layers(current_slide)
                 self.add_imported_layers(slide, current_slide)
 
@@ -366,17 +361,15 @@ class InkSlides(object):
                 if sublayers:
                     # here, the sublayers of the sublayer are present, which are treated as frames.
                     # We add them as frames to slide_tree
-
                     for sublayer in sublayers:
                         current_slide.append(get_label(sublayer))
                         self.add_imported_layers(sublayer, current_slide)
-                        slide_tree.append((num_slide, current_slide[:]))
+                        yield current_slide[:]
 
                 else:
                     # no sublayers present, we therefore add the current layer
-                    slide_tree.append((num_slide, current_slide[:]))
+                    yield current_slide[:]
 
-        return slide_tree
 
     def get_flat_layer_structure(self):
         """
