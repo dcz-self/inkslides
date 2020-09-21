@@ -362,9 +362,9 @@ class InkSlides(object):
                     # here, the sublayers of the sublayer are present, which are treated as frames.
                     # We add them as frames to slide_tree
                     for sublayer in sublayers:
-                        current_slide.append(get_label(sublayer))
-                        self.add_imported_layers(sublayer, current_slide)
-                        yield current_slide[:]
+                        sub_slide = current_slide + [get_label(sublayer)]
+                        self.add_imported_layers(sublayer, sub_slide)
+                        yield sub_slide[:]
 
                 else:
                     # no sublayers present, we therefore add the current layer
